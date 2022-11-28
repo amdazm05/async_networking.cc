@@ -30,7 +30,7 @@ class Async_UDP_server
         );
         boost::asio::ip::udp::socket _socket;
         boost::asio::ip::udp::endpoint _endpoint;
-        std::array<char,1> recieve_buffer;
+        std::array<char, 1 << 15> recieve_buffer;
         boost::shared_ptr<std::string> replymessage;
 };
 

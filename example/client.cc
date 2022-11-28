@@ -21,13 +21,15 @@ int main(int argc, char* argv[])
     udp::socket socket(io_service);
     socket.open(udp::v4());
 
-    boost::array<char, 13> send_buf  = {'a','v','d'};
-    socket.send_to(boost::asio::buffer(send_buf), remote_endpoint);
+    // boost::array<char, 3> send_buf  = {'a','v','d'};
+    char sendbuf[4] = {'a','b','c','\0'};
+    socket.send_to(boost::asio::buffer(sendbuf), remote_endpoint);
+
+    std::cout.write(sendbuf, 3);
 
     boost::array<char, 128> recv_buf;
-    udp::endpoint sender_endpoint;
     size_t len = socket.receive_from(
-        boost::asio::buffer(recv_buf), sender_endpoint);
+        boost::asio::buffer(recv_buf), remote_endpoint);
 
     std::cout.write(recv_buf.data(), len);
   }

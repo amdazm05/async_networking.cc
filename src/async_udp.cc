@@ -8,10 +8,9 @@ Async_UDP_server::Async_UDP_server(boost::asio::io_service &ioservice, int PortN
                 boost::asio::ip::udp::v4(),
                 PortNum
                 )
-           ),
-    // Make sure recieve buffer is empty on initialisation
-    recieve_buffer({})
+           )
 {
+    recieve_buffer = {};
     std::cout<<"******** --- UDP SERVER INITIALISED --- ********"<<std::endl;
     start_receiver();
 }
@@ -43,7 +42,7 @@ void Async_UDP_server::handle_receieve(
     std::cout<<"Handling recieved bytes count: "<<recievedByteCount<<std::endl;
     
     for(int i=0 ;i<recievedByteCount;i++)
-        printf("Recieved character : %i %c" ,i, recieve_buffer.data()+i);
+        printf("Recieved character : %i %c" ,i, *(recieve_buffer.data()+i));
         std::cout<<std::endl;
 
     replymessage  = boost::make_shared<std::string>("I sent you something :)");
