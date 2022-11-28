@@ -7,6 +7,7 @@
 // Boost imports
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 class Async_UDP_server
 {
@@ -21,9 +22,16 @@ class Async_UDP_server
                 const boost::system::error_code & error_caught,
                 size_t recievedByteCount 
         );
+
+        void handle_send(
+            boost::shared_ptr<std::string>,
+            const boost::system::error_code&,
+            std::size_t 
+        );
         boost::asio::ip::udp::socket _socket;
         boost::asio::ip::udp::endpoint _endpoint;
         std::array<char,1> recieve_buffer;
+        boost::shared_ptr<std::string> replymessage;
 };
 
 // References used :
