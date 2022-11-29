@@ -1,5 +1,6 @@
 #include <async_udp.hpp>
 
+// ******** Server ********
 Async_UDP_server::Async_UDP_server(boost::asio::io_service &ioservice, int PortNum)
     : 
     // Bind socket to the portnumber passed
@@ -65,6 +66,7 @@ void Async_UDP_server::handle_send
             std::size_t 
     )
 {
-    std::cout<<"Message Sent "<<std::endl;
-    
+    std::cout<<"Message Sent "<<std::endl;   
 }
+
+// ******** Client side ********
