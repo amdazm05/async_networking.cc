@@ -41,11 +41,7 @@ void Async_UDP_server::handle_receieve(
 {
     // replymessage = boost::make_shared<std::string> (new std::string("Reply"));
     std::cout<<"Handling recieved bytes count: "<<recievedByteCount<<std::endl;
-    
-    for(int i=0 ;i<recievedByteCount;i++)
-        printf("Recieved character : %i %c" ,i, *(recieve_buffer.data()+i));
-        std::cout<<std::endl;
-
+    std::cout<<recieve_buffer.data()<<std::endl;
     replymessage  = boost::make_shared<std::string>("I sent you something :)");
     _socket.async_send_to
     (
@@ -70,3 +66,38 @@ void Async_UDP_server::handle_send
 }
 
 // ******** Client side ********
+Async_UDP_client::Async_UDP_client (std::string serverIP, int PortNum) :
+    _socket( this-> io_service)
+{
+    // Open the socket
+    std::cout<<"******** --- UDP CLIENT INITIALISED --- ********"<<std::endl;
+    _socket.open(boost::asio::ip::udp::v4());
+    
+    _endpoint =  
+        boost::asio::ip::udp::endpoint
+        (
+            boost::asio::ip::address::from_string(serverIP),
+            PortNum
+        );
+
+}
+
+void Async_UDP_client::sendPacket(std::shared_ptr<char *> buffer, std::size_t sizeofBuffer)
+{
+    bufferPtr = buffer;
+    // Simply place the buffer in a safer pointer 
+    std::shared_ptr<char *> packetBuffer = bufferPtr.lock();
+    // Check if packetBuffer is not NULL for some odd reasons
+    if(static_cast<bool>(packetBuffer))
+        _socket.send_to(boost::asio::buffer(*packetBuffer.get(),sizeofBuffer), _endpoint);
+    
+    bufferPtr.reset();
+    return;
+}
+
+void  Async_UDP_client::recievePacket()
+{
+    size_t len = _socket.receive_from(boost::asio::buffer(recieve_buffer), _endpoint);
+    std::cout.write(recieve_buffer.data(),len);
+    recieve_buffer.empty();
+}

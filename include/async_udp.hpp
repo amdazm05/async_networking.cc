@@ -8,8 +8,11 @@
 // Boost imports
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/array.hpp>
 #include <boost/make_shared.hpp>
 
+//Macros 
+#define  SERVER_BUFFER_BYTES  1 << 15
 class Async_UDP_server
 {
     public:
@@ -30,7 +33,8 @@ class Async_UDP_server
         );
         boost::asio::ip::udp::socket _socket;
         boost::asio::ip::udp::endpoint _endpoint;
-        std::array<char, 1 << 15> recieve_buffer;
+        // 65535 bytes in place
+        std::array<char,SERVER_BUFFER_BYTES> recieve_buffer;
         boost::shared_ptr<std::string> replymessage;
 };
 
@@ -39,12 +43,15 @@ class Async_UDP_client
     public:
         Async_UDP_client()=delete; // This constructor is not usuable
         Async_UDP_client(std::string serverIP, int PortNum);
-        void sendPacket(std::shared_ptr<char> buffer, std::size_t sizeofBuffer);
+        void sendPacket(std::shared_ptr<char *> buffer, std::size_t sizeofBuffer);
+        void recievePacket();
     private:
         boost::asio::io_service io_service;
         boost::asio::ip::udp::socket _socket;
         boost::asio::ip::udp::endpoint _endpoint;
-        std::weak_ptr<char> bufferPtr;
+        // We will be needing this later
+        std::weak_ptr<char *> bufferPtr;
+        std::array<char,SERVER_BUFFER_BYTES> recieve_buffer;
 };
 
 // References used :

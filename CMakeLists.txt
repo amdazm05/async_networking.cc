@@ -24,31 +24,30 @@ target_include_directories(
     ${PROJECT_SOURCE_DIR}/include
 )
 
-# Client example this will need some runtime argument
-add_executable(client ./example/client.cc)
 if (WIN32)
 # For windows specific applications
 target_link_libraries(
-    ${PROJECT_NAME}
-    PUBLIC
-    ${Boost_LIBRARIES}
-    ws2_32
-)
-
-target_link_libraries(
-        client
+        ${PROJECT_NAME}
         PUBLIC
         ${Boost_LIBRARIES}
         ws2_32
     )
-else()
-# Anyother OS
-    target_link_libraries(
-        client
-        PUBLIC
-        ${Boost_LIBRARIES}
-    )
+    else()
+    # Anyother OS
+target_link_libraries(
+            ${PROJECT_NAME}
+            PUBLIC
+            ${Boost_LIBRARIES}
+        )
 endif (WIN32)
+
+# Client example 
+add_executable(client ./example/client.cc)
+target_link_libraries(
+    client
+    PUBLIC
+    ${PROJECT_NAME}
+)
 
 # Server example
 add_executable(server ./example/server.cc)
