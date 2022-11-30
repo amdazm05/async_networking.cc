@@ -57,3 +57,17 @@ target_link_libraries(
     PUBLIC
     ${PROJECT_NAME}
 )
+
+add_executable(tcp_client ./example/client_tcp.cc)
+target_link_libraries(
+    tcp_client
+    PUBLIC
+    ${PROJECT_NAME}
+)
+
+add_executable(server_tcp ./example/server_tcp.cc)
+target_link_libraries(
+    server_tcp
+    PUBLIC
+    ${PROJECT_NAME}
+)

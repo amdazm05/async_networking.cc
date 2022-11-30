@@ -30,6 +30,7 @@ class Async_TCP_server
     public:
         Async_TCP_server()=delete;
         Async_TCP_server(int PortNum);
+        void run();
     private:
         void start_accept();
         void handle_accept(boost::shared_ptr<TCP_connection> connection_request,

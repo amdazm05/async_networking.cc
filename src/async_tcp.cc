@@ -65,3 +65,9 @@ void Async_TCP_server::handle_accept(boost::shared_ptr<TCP_connection> connectio
     
     start_accept();
 }
+
+
+void Async_TCP_server::run()
+{
+    io_context_.run();
+}
