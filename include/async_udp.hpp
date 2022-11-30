@@ -17,7 +17,8 @@ class Async_UDP_server
 {
     public:
         Async_UDP_server()=delete; // This constructor is not usuable
-        Async_UDP_server(boost::asio::io_service &ioservice, int PortNum);
+        Async_UDP_server(int PortNum);
+        void run();
     private:
         //  Member functions to expose
         void start_receiver();
@@ -31,6 +32,7 @@ class Async_UDP_server
             const boost::system::error_code&,
             std::size_t 
         );
+        boost::asio::io_service io_service;
         boost::asio::ip::udp::socket _socket;
         boost::asio::ip::udp::endpoint _endpoint;
         // 65535 bytes in place

@@ -16,6 +16,7 @@ endif(Boost_FOUND)
 add_library(
     ${PROJECT_NAME} STATIC
     ${PROJECT_SOURCE_DIR}/src/async_udp.cc
+    ${PROJECT_SOURCE_DIR}/src/async_tcp.cc
 )
 
 target_include_directories(

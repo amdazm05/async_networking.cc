@@ -1,10 +1,10 @@
 #include <async_udp.hpp>
 
 // ******** Server ********
-Async_UDP_server::Async_UDP_server(boost::asio::io_service &ioservice, int PortNum)
+Async_UDP_server::Async_UDP_server(int PortNum)
     : 
     // Bind socket to the portnumber passed
-    _socket(  ioservice, 
+    _socket(  io_service, 
               boost::asio::ip::udp::endpoint(
                 boost::asio::ip::udp::v4(),
                 PortNum
@@ -65,9 +65,13 @@ void Async_UDP_server::handle_send
     std::cout<<"Message Sent "<<std::endl;   
 }
 
+void Async_UDP_server::run()
+{
+    io_service.run();
+}
 // ******** Client side ********
 Async_UDP_client::Async_UDP_client (std::string serverIP, int PortNum) :
-    _socket( this-> io_service)
+_socket(io_service)
 {
     // Open the socket
     std::cout<<"******** --- UDP CLIENT INITIALISED --- ********"<<std::endl;
@@ -99,5 +103,4 @@ void  Async_UDP_client::recievePacket()
 {
     size_t len = _socket.receive_from(boost::asio::buffer(recieve_buffer), _endpoint);
     std::cout.write(recieve_buffer.data(),len);
-    recieve_buffer.empty();
 }
