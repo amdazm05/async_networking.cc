@@ -1,36 +1,27 @@
+#include <async_tcp.hpp>
 #include <iostream>
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
 
-using boost::asio::ip::tcp;
 
-int main(int argc, char* argv[])
+void send_something(std::string host, int port, std::string message)
 {
-  try
-  {
+	boost::asio::io_service ios;
+			
+        boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(host), port);
 
-    boost::asio::io_context io_context;
+        boost::asio::ip::tcp::socket socket(ios);
 
-    tcp::endpoint remote_endpoint = tcp::endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8090);
+	socket.connect(endpoint);
 
-    tcp::socket socket(io_context);
-    boost::asio::connect(socket, remote_endpoint);
+	std::array<char, 128> buf;
+        std::copy(message.begin(),message.end(),buf.begin());
+	boost::system::error_code error;
+	socket.write_some(boost::asio::buffer(buf, message.size()), error);
+        socket.close();
 
-    
-      boost::array<char, 128> buf = {'a', 'b','c'};
-      boost::system::error_code error;
+}
 
-      size_t len = socket.write_some(boost::asio::buffer(buf), error);
-
-     
-      if (error)
-        throw boost::system::system_error(error); // Some other error.
-    
-  }
-  catch (std::exception& e)
-  {
-    std::cerr << e.what() << std::endl;
-  }
-
-  return 0;
+int main()
+{
+    send_something("127.0.0.1", 8090, "hello flowers team");
+    return 0;
 }

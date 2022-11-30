@@ -32,6 +32,7 @@ target_link_libraries(
         PUBLIC
         ${Boost_LIBRARIES}
         ws2_32
+        wsock32
     )
     else()
     # Anyother OS
