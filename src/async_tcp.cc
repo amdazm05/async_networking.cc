@@ -1,5 +1,6 @@
 #include <async_tcp.hpp>
 
+std::array<char,1<<15> TCP_connection::_message = {};
 // ********  TCP Connections ***********
 TCP_connection::TCP_connection(boost::asio::io_context& io_context )
 : _socket(io_context)
@@ -18,6 +19,11 @@ boost::asio::ip::tcp::socket& TCP_connection::socket()
     return _socket;
 }
 
+inline std::array<char,1<<15> * TCP_connection::get_buffer()
+{
+    return &(_message);
+}
+
 // Please refer here for clarity
 // https://stackoverflow.com/questions/5352757/boost-asio-socket-how-to-get-ip-port-address-of-connection
 void TCP_connection::start_listening()
@@ -28,6 +34,7 @@ void TCP_connection::start_listening()
     boost::bind(&TCP_connection::handle_read, shared_from_this(),
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
+    std::cout<<"timeout"<<std::endl;
 }
 
 void TCP_connection::handle_read(const boost::system::error_code error,size_t bytesrecieved )
@@ -53,6 +60,7 @@ void Async_TCP_server::start_accept()
             boost::asio::placeholders::error
         )
     );
+    
 }
 
 void Async_TCP_server::handle_accept(boost::shared_ptr<TCP_connection> connection_request,
@@ -66,8 +74,30 @@ void Async_TCP_server::handle_accept(boost::shared_ptr<TCP_connection> connectio
     start_accept();
 }
 
+void Async_TCP_server::setPolling(bool flag)
+{
+    pollingFlag = flag;
+}
 
 void Async_TCP_server::run()
 {
-    io_context_.run();
+    // option to poll the user run_once and run 
+    // read these https://stackoverflow.com/questions/291871/how-to-set-a-timeout-on-blocking-sockets-in-boost-asio
+    // https://stackoverflow.com/questions/4705411/boostasio-io-service-run-vs-poll-or-how-do-i-integrate-boostasio-in-ma
+    if(!static_cast<bool>(pollingFlag))
+    {
+        io_context_.run();
+    }
+
+    else
+    {
+        // Read this
+        // https://stackoverflow.com/questions/51878733/boostasioio-contextrun-one-for-fails-to-send-large-buffer
+        io_context_.run_one_for(std::chrono::milliseconds(2000));
+    }
+}
+
+std::array<char,1<<15> * Async_TCP_server::getData()
+{
+    return TCP_connection::get_buffer();
 }

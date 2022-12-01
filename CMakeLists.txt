@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 cmake_policy(SET CMP0074 NEW)
+option(EXAMPLES "Examples are off" OFF)
 # Project Name
 project(async_udp)
 
@@ -44,32 +45,34 @@ target_link_libraries(
         )
 endif (WIN32)
 
-# Client example 
-add_executable(client ./example/client.cc)
-target_link_libraries(
-    client
-    PUBLIC
-    ${PROJECT_NAME}
-)
+IF(EXAMPLES)
+    # Client example 
+    add_executable(client ./example/client.cc)
+    target_link_libraries(
+        client
+        PUBLIC
+        ${PROJECT_NAME}
+    )
 
-# Server example
-add_executable(server ./example/server.cc)
-target_link_libraries(
-    server
-    PUBLIC
-    ${PROJECT_NAME}
-)
+    # Server example
+    add_executable(server ./example/server.cc)
+    target_link_libraries(
+        server
+        PUBLIC
+        ${PROJECT_NAME}
+    )
 
-add_executable(tcp_client ./example/client_tcp.cc)
-target_link_libraries(
-    tcp_client
-    PUBLIC
-    ${PROJECT_NAME}
-)
+    add_executable(tcp_client ./example/client_tcp.cc)
+    target_link_libraries(
+        tcp_client
+        PUBLIC
+        ${PROJECT_NAME}
+    )
 
-add_executable(server_tcp ./example/server_tcp.cc)
-target_link_libraries(
-    server_tcp
-    PUBLIC
-    ${PROJECT_NAME}
-)
+    add_executable(server_tcp ./example/server_tcp.cc)
+    target_link_libraries(
+        server_tcp
+        PUBLIC
+        ${PROJECT_NAME}
+    )
+ENDIF()
