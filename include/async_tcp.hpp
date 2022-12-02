@@ -18,12 +18,14 @@ class TCP_connection
         static boost::shared_ptr<TCP_connection> create(boost::asio::io_context& io_context);
         boost::asio::ip::tcp::socket& socket();
         void start_listening();
-        static std::array<char,1<<15> * get_buffer();
+        static const std::array<char,1<<15> * get_buffer();
+        static const std::size_t get_bytes_recieved();
     private:
         TCP_connection(boost::asio::io_context& io_context);
         void handle_read(const boost::system::error_code error,size_t bytesrecieved );
         boost::asio::ip::tcp::socket _socket;
-        static std::array<char,1<<15> _message; 
+        static std::array<char,1<<15> _message;
+        static std::size_t bytesRecieved; 
 };
 
 class Async_TCP_server
@@ -33,7 +35,8 @@ class Async_TCP_server
         Async_TCP_server(int PortNum);
         void run();
         void setPolling(bool flag);
-        std::array<char,1<<15> * getData();
+        const std::array<char,1<<15> * getData();
+        const std::size_t getSizeofData();
     private:
         void start_accept();
         void handle_accept(boost::shared_ptr<TCP_connection> connection_request,

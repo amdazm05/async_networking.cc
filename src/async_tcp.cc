@@ -1,6 +1,7 @@
 #include <async_tcp.hpp>
 
 std::array<char,1<<15> TCP_connection::_message = {};
+std::size_t TCP_connection::bytesRecieved = {};
 // ********  TCP Connections ***********
 TCP_connection::TCP_connection(boost::asio::io_context& io_context )
 : _socket(io_context)
@@ -19,9 +20,14 @@ boost::asio::ip::tcp::socket& TCP_connection::socket()
     return _socket;
 }
 
-inline std::array<char,1<<15> * TCP_connection::get_buffer()
+inline const std::array<char,1<<15> * TCP_connection::get_buffer()
 {
     return &(_message);
+}
+
+inline const std::size_t TCP_connection::get_bytes_recieved()
+{
+    return bytesRecieved;
 }
 
 // Please refer here for clarity
@@ -29,17 +35,19 @@ inline std::array<char,1<<15> * TCP_connection::get_buffer()
 void TCP_connection::start_listening()
 {
     std::cout<<"Listening to "<<_socket.remote_endpoint().address().to_string()<<std::endl;
-    
+    // clear previous messages
+    bytesRecieved ={};
+    _message = {};
     boost::asio::async_read(_socket, boost::asio::buffer(_message),
     boost::bind(&TCP_connection::handle_read, shared_from_this(),
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
-    std::cout<<"timeout"<<std::endl;
 }
 
 void TCP_connection::handle_read(const boost::system::error_code error,size_t bytesrecieved )
 {
-    std::cout<<"Recieved this message :"<< _message.data()<<std::endl;
+    bytesRecieved = bytesrecieved;
+    // std::cout<<"Recieved this message :"<< _message.data()<<std::endl;
 }
 
 // ********  TCP Server     ***********
@@ -60,7 +68,6 @@ void Async_TCP_server::start_accept()
             boost::asio::placeholders::error
         )
     );
-    
 }
 
 void Async_TCP_server::handle_accept(boost::shared_ptr<TCP_connection> connection_request,
@@ -93,11 +100,16 @@ void Async_TCP_server::run()
     {
         // Read this
         // https://stackoverflow.com/questions/51878733/boostasioio-contextrun-one-for-fails-to-send-large-buffer
-        io_context_.run_one_for(std::chrono::milliseconds(2000));
+        io_context_.run_one_for(std::chrono::milliseconds(10));
     }
 }
 
-std::array<char,1<<15> * Async_TCP_server::getData()
+const std::array<char,1<<15> * Async_TCP_server::getData()
 {
     return TCP_connection::get_buffer();
+}
+
+const std::size_t Async_TCP_server::getSizeofData()
+{
+    return TCP_connection::get_bytes_recieved();
 }
