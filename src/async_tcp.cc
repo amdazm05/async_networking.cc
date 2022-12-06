@@ -1,6 +1,7 @@
 #include <async_tcp.hpp>
 
 std::array<char,1<<15> TCP_connection::_message = {};
+std::size_t TCP_connection::bytesRecieved = {};
 // ********  TCP Connections ***********
 TCP_connection::TCP_connection(boost::asio::io_context& io_context )
 : _socket(io_context)
@@ -19,9 +20,14 @@ boost::asio::ip::tcp::socket& TCP_connection::socket()
     return _socket;
 }
 
-inline std::array<char,1<<15> * TCP_connection::get_buffer()
+inline const std::array<char,1<<15> * TCP_connection::get_buffer()
 {
     return &(_message);
+}
+
+inline const std::size_t TCP_connection::get_bytes_recieved()
+{
+    return bytesRecieved;
 }
 
 // Please refer here for clarity
@@ -29,17 +35,19 @@ inline std::array<char,1<<15> * TCP_connection::get_buffer()
 void TCP_connection::start_listening()
 {
     std::cout<<"Listening to "<<_socket.remote_endpoint().address().to_string()<<std::endl;
-    
+    // clear previous messages
+    bytesRecieved ={};
+    _message = {};
     boost::asio::async_read(_socket, boost::asio::buffer(_message),
     boost::bind(&TCP_connection::handle_read, shared_from_this(),
         boost::asio::placeholders::error,
         boost::asio::placeholders::bytes_transferred));
-    std::cout<<"timeout"<<std::endl;
 }
 
 void TCP_connection::handle_read(const boost::system::error_code error,size_t bytesrecieved )
 {
-    std::cout<<"Recieved this message :"<< _message.data()<<std::endl;
+    bytesRecieved = bytesrecieved;
+    // std::cout<<"Recieved this message :"<< _message.data()<<std::endl;
 }
 
 // ********  TCP Server     ***********
@@ -61,6 +69,7 @@ void Async_TCP_server::start_accept()
         )
     );
     
+    // std::cout<<latched_connection->socket().remote_endpoint().address().to_string()<<std::endl;
 }
 
 void Async_TCP_server::handle_accept(boost::shared_ptr<TCP_connection> connection_request,
@@ -69,8 +78,16 @@ void Async_TCP_server::handle_accept(boost::shared_ptr<TCP_connection> connectio
     if(!error)
     {
         connection_request->start_listening();
+        latched_connection = connection_request;
+        latched_to_a_client = true;
+        std::cout<<latched_connection->socket().remote_endpoint().address().to_string()<<std::endl;
+        std::string sourceparameters = "hello back";
+        send_bytes_to_client(std::shared_ptr<char>(sourceparameters.data()),sourceparameters.size()+1);
     }
-    
+    else
+    {
+        latched_to_a_client = false;
+    }
     start_accept();
 }
 
@@ -93,11 +110,51 @@ void Async_TCP_server::run()
     {
         // Read this
         // https://stackoverflow.com/questions/51878733/boostasioio-contextrun-one-for-fails-to-send-large-buffer
-        io_context_.run_one_for(std::chrono::milliseconds(2000));
+        io_context_.run_one_for(std::chrono::milliseconds(30));
     }
 }
 
-std::array<char,1<<15> * Async_TCP_server::getData()
+const std::array<char,1<<15> * Async_TCP_server::getData()
 {
     return TCP_connection::get_buffer();
+}
+
+const std::size_t Async_TCP_server::getSizeofData()
+{
+    return TCP_connection::get_bytes_recieved();
+}
+
+bool Async_TCP_server::send_bytes_to_client(std::shared_ptr<char> buffer , std::size_t sizeofBuffer)
+{
+    bool status = true;
+    sendBuffer = buffer;
+
+    std::cout<<"Sending to client "<<latched_connection->socket().remote_endpoint().address().to_string()<<std::endl;
+    // Make sure the buffer is not NULL
+    if(!static_cast<bool>(sendBuffer.expired()))
+    {
+        std::shared_ptr<char> bufferToSend = sendBuffer.lock();
+        boost::asio::async_write(
+            latched_connection->socket(),
+            boost::asio::buffer(bufferToSend.get(),sizeofBuffer),
+            boost::bind(&Async_TCP_server::handlewrite, this,
+            boost::asio::placeholders::error,
+            boost::asio::placeholders::bytes_transferred)
+        );
+    }
+
+    return status;
+}
+
+void Async_TCP_server::handlewrite(const boost::system::error_code error,size_t bytestransfered )
+{
+    if(!error)
+    std::cout<<"handling a write :" <<std::endl;
+
+    std::cout<<error<<std::endl;
+}
+
+bool Async_TCP_server::isServerLatchedtoAClient()
+{
+    return latched_to_a_client;
 }
