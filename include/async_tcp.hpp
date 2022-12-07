@@ -46,6 +46,8 @@ class Async_TCP_server
         void handlewrite(const boost::system::error_code error,size_t bytestransfered );
         boost::asio::io_context io_context_;
         boost::asio::ip::tcp::acceptor _acceptor;
+        std::size_t buffersizetosend;
+        std::array<char, 1<<15 > buffer;
         std::weak_ptr<char> sendBuffer;
         boost::shared_ptr<TCP_connection> latched_connection;
         bool latched_to_a_client;
