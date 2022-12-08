@@ -20,6 +20,7 @@ class TCP_connection
         void start_listening();
         static const std::array<char,1<<15> * get_buffer();
         static const std::size_t get_bytes_recieved();
+        static void clearRecievedData();
     private:
         TCP_connection(boost::asio::io_context& io_context);
         void handle_read(const boost::system::error_code error,size_t bytesrecieved );
@@ -39,6 +40,7 @@ class Async_TCP_server
         const std::array<char,1<<15> * getData();
         const std::size_t getSizeofData();
         bool isServerLatchedtoAClient();
+        void clear_read_data();
     private:
         void start_accept();
         void handle_accept(boost::shared_ptr<TCP_connection> connection_request,

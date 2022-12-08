@@ -30,6 +30,11 @@ inline const std::size_t TCP_connection::get_bytes_recieved()
     return bytesRecieved;
 }
 
+void TCP_connection::clearRecievedData()
+{
+    bytesRecieved={};
+}
+
 // Please refer here for clarity
 // https://stackoverflow.com/questions/5352757/boost-asio-socket-how-to-get-ip-port-address-of-connection
 void TCP_connection::start_listening()
@@ -165,4 +170,9 @@ void Async_TCP_server::handlewrite(const boost::system::error_code error,size_t 
 bool Async_TCP_server::isServerLatchedtoAClient()
 {
     return latched_to_a_client;
+}
+
+void Async_TCP_server::clear_read_data()
+{
+    TCP_connection::clearRecievedData();
 }
