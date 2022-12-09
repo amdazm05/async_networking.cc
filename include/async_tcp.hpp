@@ -36,7 +36,7 @@ class Async_TCP_server
         Async_TCP_server(int PortNum);
         void run();
         void setPolling(bool flag);
-        bool send_bytes_to_client(std::shared_ptr<char> buffer , std::size_t sizeofBuffer);
+        bool send_bytes_to_client(char* buffer , std::size_t sizeofBuffer);
         const std::array<char,1<<15> * getData();
         const std::size_t getSizeofData();
         bool isServerLatchedtoAClient();

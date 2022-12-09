@@ -61,6 +61,8 @@ Async_TCP_server::Async_TCP_server(int PortNum)
 : _acceptor(io_context_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), PortNum))
 {
     buffer = {};
+    // This is to avoid any crashing on any side
+    buffersizetosend = 1;
     start_accept();
 }
 
@@ -87,14 +89,13 @@ void Async_TCP_server::handle_accept(boost::shared_ptr<TCP_connection> connectio
         latched_connection = connection_request;
         latched_to_a_client = true;
         std::cout<<latched_connection->socket().remote_endpoint().address().to_string()<<std::endl;
-
         boost::asio::async_write(
             latched_connection->socket(),
             boost::asio::buffer(buffer,buffersizetosend),
             boost::bind(&Async_TCP_server::handlewrite, this,
             boost::asio::placeholders::error,
             boost::asio::placeholders::bytes_transferred)
-        );
+        );    
     }
     else
     {
@@ -136,33 +137,31 @@ const std::size_t Async_TCP_server::getSizeofData()
     return TCP_connection::get_bytes_recieved();
 }
 
-bool Async_TCP_server::send_bytes_to_client(std::shared_ptr<char> buff , std::size_t sizeofBuffer)
+bool Async_TCP_server::send_bytes_to_client(char* buff , std::size_t sizeofBuffer)
 {
     bool status = true;
-    sendBuffer = buff;
 
     std::cout<<"Sending to client "<<latched_connection->socket().remote_endpoint().address().to_string()<<std::endl;
     std::cout<<"Sizeof buffer "<<sizeofBuffer<<std::endl;
     // Make sure the buffer is not NULL
-    if(!static_cast<bool>(sendBuffer.expired()))
+    if(buff)
     {
-        buffersizetosend = sizeofBuffer;
-        std::shared_ptr<char> bufferToSend = sendBuffer.lock();
-        std::copy(bufferToSend.get(),bufferToSend.get()+sizeofBuffer,buffer.begin());
+        std::copy(buff,buff+sizeofBuffer,buffer.data());
         std::cout<<"Buffer sent :: "<<buffer.data()<<std::endl;
+        buffersizetosend = sizeofBuffer;
     }
     else
     {
         buffer ={};
     }
-
+    
     return status;
 }
 
 void Async_TCP_server::handlewrite(const boost::system::error_code error,size_t bytestransfered )
 {
     if(!error)
-    std::cout<<"handling a write :" <<std::endl;
+    std::cout<<"handling a write :" <<"Bytes to transfer "<<bytestransfered<<std::endl;
 
     std::cout<<error<<std::endl;
 }
