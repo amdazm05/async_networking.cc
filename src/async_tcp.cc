@@ -1,6 +1,6 @@
 #include <async_tcp.hpp>
 
-std::array<char,1<<15> TCP_connection::_message = {};
+std::array<char,1<<16> TCP_connection::_message = {};
 std::size_t TCP_connection::bytesRecieved = {};
 // ********  TCP Connections ***********
 TCP_connection::TCP_connection(boost::asio::io_context& io_context )
@@ -20,7 +20,7 @@ boost::asio::ip::tcp::socket& TCP_connection::socket()
     return _socket;
 }
 
-inline const std::array<char,1<<15> * TCP_connection::get_buffer()
+inline const std::array<char,1<<16> * TCP_connection::get_buffer()
 {
     return &(_message);
 }
@@ -127,7 +127,7 @@ void Async_TCP_server::run()
     }
 }
 
-const std::array<char,1<<15> * Async_TCP_server::getData()
+const std::array<char,1<<16> * Async_TCP_server::getData()
 {
     return TCP_connection::get_buffer();
 }

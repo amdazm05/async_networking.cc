@@ -18,14 +18,14 @@ class TCP_connection
         static boost::shared_ptr<TCP_connection> create(boost::asio::io_context& io_context);
         boost::asio::ip::tcp::socket& socket();
         void start_listening();
-        static const std::array<char,1<<15> * get_buffer();
+        static const std::array<char,1<<16> * get_buffer();
         static const std::size_t get_bytes_recieved();
         static void clearRecievedData();
     private:
         TCP_connection(boost::asio::io_context& io_context);
         void handle_read(const boost::system::error_code error,size_t bytesrecieved );
         boost::asio::ip::tcp::socket _socket;
-        static std::array<char,1<<15> _message;
+        static std::array<char,1<<16> _message;
         static std::size_t bytesRecieved; 
 };
 
@@ -37,7 +37,7 @@ class Async_TCP_server
         void run();
         void setPolling(bool flag);
         bool send_bytes_to_client(char* buffer , std::size_t sizeofBuffer);
-        const std::array<char,1<<15> * getData();
+        const std::array<char,1<<16> * getData();
         const std::size_t getSizeofData();
         bool isServerLatchedtoAClient();
         void clear_read_data();
@@ -49,7 +49,7 @@ class Async_TCP_server
         boost::asio::io_context io_context_;
         boost::asio::ip::tcp::acceptor _acceptor;
         std::size_t buffersizetosend;
-        std::array<char, 1<<15 > buffer;
+        std::array<char, 1<<16 > buffer;
         std::weak_ptr<char> sendBuffer;
         boost::shared_ptr<TCP_connection> latched_connection;
         bool latched_to_a_client;
